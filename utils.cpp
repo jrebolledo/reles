@@ -104,7 +104,7 @@ void processCtrlPacket(boolean type) { // true: manual, false: rule
   //       + moff + u
   boolean rule_is_used;
   boolean notifyIOchanges = false;
-  byte now[5];
+  byte now[6];
   getDateTime(now); // store current date in local variable now
   // normalize date to minutes to compare with another date
   long now_norm = normDate(now);
@@ -267,9 +267,11 @@ void checkControlRules(boolean forced) {
       Serial.println("\t(CheckCtrl)");
     #endif
     // iterate over each IO and evaluate manual (is it applicable now?) or control rule,
-    byte now[5];
+    byte now[6];
     getDateTime(now); // store current date in local variable now
-    printDate(now);Serial.println();
+    #if (DEBUG)
+      printDate(now);Serial.println();
+    #endif
     // normalize date to minutes to compare with another date
     long now_norm = normDate(now);
     byte now_for_step_detection = now[3]*6 + now[4]/10; // 144 end of the day (00:00), now[4]/10 round to floor
@@ -509,17 +511,19 @@ void setDateTime(){
   #endif
   
   RTC.stop();
-  RTC.set(DS1307_YR, (int)bufferIn.params[0]);         //set the year
-  RTC.set(DS1307_MTH, (int)bufferIn.params[1]);        //set the month
-  RTC.set(DS1307_DATE, (int)bufferIn.params[2]);       //set the date
-  RTC.set(DS1307_HR, (int)bufferIn.params[3]);       //set the hours
+  RTC.set(DS1307_SEC, (int)bufferIn.params[5]);        //set the seconds
   RTC.set(DS1307_MIN, (int)bufferIn.params[4]);     //set the minutes
-  RTC.set(DS1307_SEC, 1);        //set the seconds
+  RTC.set(DS1307_HR, (int)bufferIn.params[3]);       //set the hours
+  RTC.set(DS1307_DATE, (int)bufferIn.params[2]);       //set the date
+  RTC.set(DS1307_MTH, (int)bufferIn.params[1]);        //set the month
+  RTC.set(DS1307_YR, (int)bufferIn.params[0]);         //set the year
   RTC.start();
   sync_time_at_boot = false;
-  byte now[5];
-  getDateTime(now);
-  printDate(now);Serial.println();
+  #if DEBUG
+    byte now[6];
+    getDateTime(now);
+    printDate(now);Serial.println();
+  #endif
 }
 
 void getDateTime(byte* data) {
@@ -528,6 +532,7 @@ void getDateTime(byte* data) {
   data[2] = (byte)RTC.get(DS1307_DATE,true);
   data[3] = (byte)RTC.get(DS1307_HR,true);
   data[4] = (byte)RTC.get(DS1307_MIN,true);
+  data[5] = (byte)RTC.get(DS1307_SEC,true);
 }
 
 
@@ -803,7 +808,7 @@ void printList(byte *cadena, byte start_index, byte len) {
 
 void printDate(byte * cadena) {
   #if DEBUG
-    printList(cadena,0,5);
+    printList(cadena,0,6);
   #endif
 }
 

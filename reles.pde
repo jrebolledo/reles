@@ -55,9 +55,10 @@ void setup() {
   #if (DEBUG)
     Serial.print("\t(Starting) :(");
   #endif
-  byte now[5];
-  getDateTime(now);
+  
   #if (DEBUG)
+    byte now[6];
+    getDateTime(now);
     printDate(now);Serial.println(")");
   #endif
   //backupData(true);
